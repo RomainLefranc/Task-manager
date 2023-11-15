@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { frFR } from "@clerk/localizations";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={frFR}>
       <html
         lang="fr"
         className={cn(inter.className, "dark")}
