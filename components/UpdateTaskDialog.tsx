@@ -40,6 +40,7 @@ function UpdateTaskDialog({ open, setOpen, collection, task }: Props) {
     defaultValues: {
       content: task.content,
       expiresAt: task.expiresAt ? task.expiresAt : undefined,
+      collectionId: collection.id,
     },
   });
 
@@ -72,7 +73,7 @@ function UpdateTaskDialog({ open, setOpen, collection, task }: Props) {
     <Dialog open={open} onOpenChange={openChangeWrapper}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex gap-2">
+          <DialogTitle>
             Modifier la tâche de la collection:
             <span className="p-[1px]">{task.content}</span>
           </DialogTitle>
