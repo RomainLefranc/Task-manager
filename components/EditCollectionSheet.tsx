@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "./ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { useForm } from "react-hook-form";
 import { collectionSchema, collectionSchemaType } from "@/schema/Collection";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,26 +24,31 @@ import { CollectionColor, CollectionColors } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
-import { createCollection } from "@/actions/collection";
+import { updateCollection } from "@/actions/collection";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+import { Collection } from "@prisma/client";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  collection: Collection;
 }
 
-function CreateCollectionSheet({ open, onOpenChange }: Props) {
+function EditCollectionSheet({ open, onOpenChange, collection }: Props) {
   const form = useForm<collectionSchemaType>({
     resolver: zodResolver(collectionSchema),
-    defaultValues: {},
+    defaultValues: {
+      name: collection.name,
+      color: collection.color,
+    },
   });
 
   const router = useRouter();
 
   const onSubmit = async (data: collectionSchemaType) => {
     try {
-      await createCollection(data);
+      await updateCollection(collection.id, data);
 
       // Close the sheet
       openChangeWrapper(false);
@@ -57,7 +56,7 @@ function CreateCollectionSheet({ open, onOpenChange }: Props) {
 
       toast({
         title: "Succès",
-        description: "La collection a été créé avec succès",
+        description: "La collection a été modifiée avec succès",
       });
     } catch (e: any) {
       // Show toast
@@ -66,7 +65,7 @@ function CreateCollectionSheet({ open, onOpenChange }: Props) {
         description: "une erreur s'est produit, veuillez réessayer plus tard",
         variant: "destructive",
       });
-      console.log("Error while creating collection", e);
+      console.log("Error while updating collection", e);
     }
   };
 
@@ -79,10 +78,17 @@ function CreateCollectionSheet({ open, onOpenChange }: Props) {
     <Sheet open={open} onOpenChange={openChangeWrapper}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Ajouter une nouvelle collection</SheetTitle>
-          <SheetDescription>
-            Les collections sont un moyen de regrouper vos tâches
-          </SheetDescription>
+          <SheetTitle className="flex gap-2">
+            Modifier la collection:
+            <span
+              className={cn(
+                "p-[1px] bg-clip-text text-transparent",
+                CollectionColors[collection.color as CollectionColor]
+              )}
+            >
+              {collection.name}
+            </span>
+          </SheetTitle>
         </SheetHeader>
         <Form {...form}>
           <form
@@ -184,4 +190,4 @@ function CreateCollectionSheet({ open, onOpenChange }: Props) {
   );
 }
 
-export default CreateCollectionSheet;
+export default EditCollectionSheet;

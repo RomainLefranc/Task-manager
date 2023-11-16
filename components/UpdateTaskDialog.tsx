@@ -1,16 +1,9 @@
 "use client";
-import { Collection } from "@prisma/client";
+import { Task } from "@prisma/client";
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from "./ui/dialog";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
-import { CollectionColor, CollectionColors } from "@/lib/constants";
 import { useForm } from "react-hook-form";
 import { taskSchema, taskSchemaType } from "@/schema/Task";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,22 +22,22 @@ import { Calendar } from "./ui/calendar";
 import { Button } from "./ui/button";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { format } from "date-fns";
-import { createTask } from "@/actions/task";
+import { updateTask } from "@/actions/task";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import fr from "date-fns/locale/fr";
-
 interface Props {
   open: boolean;
-  collection: Collection;
   setOpen: (open: boolean) => void;
+  task: Task;
 }
 
-function CreateTaskDialog({ open, collection, setOpen }: Props) {
+function UpdateTaskDialog({ open, setOpen, task }: Props) {
   const form = useForm<taskSchemaType>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      collectionId: collection.id,
+      content: task.content,
+      expiresAt: task.expiresAt ? task.expiresAt : undefined,
     },
   });
 
@@ -57,17 +50,17 @@ function CreateTaskDialog({ open, collection, setOpen }: Props) {
 
   const onSubmit = async (data: taskSchemaType) => {
     try {
-      await createTask(data);
+      await updateTask(task.id, data);
       toast({
         title: "Succès",
-        description: "La tâche a été créée avec succès",
+        description: "La tâche a été modifié avec succès",
       });
       openChangeWrapper(false);
       router.refresh();
     } catch (e) {
       toast({
         title: "Erreur",
-        description: "Impossible de créer un tâche",
+        description: "Impossible de modifié la tâche",
         variant: "destructive",
       });
     }
@@ -78,20 +71,9 @@ function CreateTaskDialog({ open, collection, setOpen }: Props) {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex gap-2">
-            Ajoutez la tâche à la collection:
-            <span
-              className={cn(
-                "p-[1px] bg-clip-text text-transparent",
-                CollectionColors[collection.color as CollectionColor]
-              )}
-            >
-              {collection.name}
-            </span>
+            Modifier la tâche de la collection:
+            <span className="p-[1px]">{task.content}</span>
           </DialogTitle>
-          <DialogDescription>
-            Ajoutez une tâche à votre collection. Vous pouvez ajouter autant de
-            tâches que vous le souhaitez à une collection.
-          </DialogDescription>
         </DialogHeader>
         <div className="gap-4 py-4">
           <Form {...form}>
@@ -163,10 +145,7 @@ function CreateTaskDialog({ open, collection, setOpen }: Props) {
         <DialogFooter>
           <Button
             disabled={form.formState.isSubmitting}
-            className={cn(
-              "w-full dark:text-white text-white",
-              CollectionColors[collection.color as CollectionColor]
-            )}
+            variant={"outline"}
             onClick={form.handleSubmit(onSubmit)}
           >
             Confirmer
@@ -177,4 +156,4 @@ function CreateTaskDialog({ open, collection, setOpen }: Props) {
   );
 }
 
-export default CreateTaskDialog;
+export default UpdateTaskDialog;

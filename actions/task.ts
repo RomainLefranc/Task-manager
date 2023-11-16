@@ -1,10 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { createTaskSchemaType } from "@/schema/createTask";
+import { taskSchemaType } from "@/schema/Task";
 import { currentUser } from "@clerk/nextjs";
 
-export async function createTask(data: createTaskSchemaType) {
+export async function createTask(data: taskSchemaType) {
   const user = await currentUser();
 
   if (!user) {
@@ -26,8 +26,7 @@ export async function createTask(data: createTaskSchemaType) {
     },
   });
 }
-
-export async function setTaskToDone(id: number) {
+export async function editTask(id: number, checked: boolean) {
   const user = await currentUser();
 
   if (!user) {
@@ -40,7 +39,41 @@ export async function setTaskToDone(id: number) {
       userId: user.id,
     },
     data: {
-      done: true,
+      done: checked,
+    },
+  });
+}
+
+export async function updateTask(id: number, data: taskSchemaType) {
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error("user not found");
+  }
+  const { content, expiresAt } = data;
+
+  return await prisma.task.update({
+    where: {
+      id: id,
+      userId: user.id,
+    },
+    data: {
+      content,
+      expiresAt,
+    },
+  });
+}
+
+export async function deleteTask(id: number) {
+  const user = await currentUser();
+  if (!user) {
+    throw new Error("user not found");
+  }
+
+  return await prisma.task.delete({
+    where: {
+      id: id,
+      userId: user.id,
     },
   });
 }

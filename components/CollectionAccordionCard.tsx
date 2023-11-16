@@ -4,7 +4,7 @@ import React, { useMemo, useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { CollectionColor, CollectionColors } from "@/lib/constants";
-import { CaretDownIcon, TrashIcon } from "@radix-ui/react-icons";
+import { CaretDownIcon, GearIcon, TrashIcon } from "@radix-ui/react-icons";
 import { Progress } from "./ui/progress";
 import { Separator } from "./ui/separator";
 import PlusIcon from "./icons/PlusIcon";
@@ -29,6 +29,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
+import EditCollectionSheet from "./EditCollectionSheet";
 
 interface Props {
   collection: Collection & {
@@ -40,7 +41,8 @@ function CollectionAccordionCard({ collection }: Props) {
   const router = useRouter();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-
+  const [showEditModal, setShowEditModal] = useState(false);
+  const handleShowEditModalChange = (open: boolean) => setShowEditModal(open);
   const tasks = collection.tasks;
 
   const [isLoading, startTransition] = useTransition();
@@ -75,6 +77,11 @@ function CollectionAccordionCard({ collection }: Props) {
       <CreateTaskDialog
         open={showCreateModal}
         setOpen={setShowCreateModal}
+        collection={collection}
+      />
+      <EditCollectionSheet
+        open={showEditModal}
+        onOpenChange={handleShowEditModalChange}
         collection={collection}
       />
       <Accordion type="single" collapsible>
@@ -120,12 +127,11 @@ function CollectionAccordionCard({ collection }: Props) {
               </>
             )}
             <Separator />
-            <footer className="h-[40px] px-4 p-[2px] text-xs text-neutral-500 flex justify-between items-center ">
+            <footer className=" px-4 p-[8px] text-xs text-neutral-500 flex justify-between items-center ">
               <p>
                 Créée le {collection.createdAt.toLocaleDateString("fr-FR")} à{" "}
                 {collection.createdAt.toLocaleTimeString("fr-FR")}
               </p>
-              {isLoading && <div>Suppression en cours...</div>}
               {!isLoading && (
                 <div className="flex gap-2">
                   <Button
@@ -134,6 +140,13 @@ function CollectionAccordionCard({ collection }: Props) {
                     onClick={() => setShowCreateModal(true)}
                   >
                     <PlusIcon />
+                  </Button>
+                  <Button
+                    size={"icon"}
+                    variant={"ghost"}
+                    onClick={() => setShowEditModal(true)}
+                  >
+                    <GearIcon />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

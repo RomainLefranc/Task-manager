@@ -1,20 +1,43 @@
 "use server";
 import { prisma } from "@/lib/prisma";
-import { createCollectionSchemaType } from "@/schema/createCollection";
+import { collectionSchemaType } from "@/schema/Collection";
 import { currentUser } from "@clerk/nextjs";
 
-export async function createCollection(form: createCollectionSchemaType) {
+export async function createCollection(form: collectionSchemaType) {
   const user = await currentUser();
 
   if (!user) {
     throw new Error("user not found");
   }
 
+  const { color, name } = form;
+
   return await prisma.collection.create({
     data: {
       userId: user.id,
-      color: form.color,
-      name: form.name,
+      color,
+      name,
+    },
+  });
+}
+
+export async function updateCollection(id: number, form: collectionSchemaType) {
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error("user not found");
+  }
+
+  const { color, name } = form;
+
+  return await prisma.collection.update({
+    data: {
+      color,
+      name,
+    },
+    where: {
+      id,
+      userId: user.id,
     },
   });
 }
