@@ -1,5 +1,5 @@
 "use client";
-import { Task } from "@prisma/client";
+import { Collection, Task } from "@prisma/client";
 import React, { useState, useTransition } from "react";
 import { Checkbox } from "./ui/checkbox";
 import { format } from "date-fns";
@@ -21,6 +21,7 @@ import { Button } from "./ui/button";
 import { GearIcon, TrashIcon } from "@radix-ui/react-icons";
 import { toast } from "./ui/use-toast";
 import UpdateTaskDialog from "./UpdateTaskDialog";
+import { CollectionColor, CollectionColors } from "@/lib/constants";
 
 function getExpirationColor(expiresAt: Date) {
   const days = Math.floor(expiresAt.getTime() - Date.now()) / 1000 / 60 / 60;
@@ -32,7 +33,12 @@ function getExpirationColor(expiresAt: Date) {
   return "text-green-500 dark:text-green-400";
 }
 
-function TaskCard({ task }: { task: Task }) {
+type TaskCardProps = {
+  task: Task;
+  collection: Collection;
+};
+
+function TaskCard({ task, collection }: TaskCardProps) {
   const [isLoading, startTransition] = useTransition();
   const [showEditModal, setShowEditModal] = useState(false);
   const router = useRouter();
@@ -60,12 +66,16 @@ function TaskCard({ task }: { task: Task }) {
         open={showEditModal}
         setOpen={setShowEditModal}
         task={task}
+        collection={collection}
       />
       <div className="flex justify-between">
         <div className="flex gap-2 items-start">
           <Checkbox
             id={task.id.toString()}
-            className="w-5 h-5"
+            className={cn(
+              " h-5 w-5 dark:text-white text-white border-none",
+              CollectionColors[collection.color as CollectionColor]
+            )}
             checked={task.done}
             disabled={isLoading}
             onCheckedChange={(checked: CheckedState) => {
@@ -99,7 +109,7 @@ function TaskCard({ task }: { task: Task }) {
         </div>
 
         {!isLoading && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 text-neutral-500">
             <Button
               size={"icon"}
               variant={"ghost"}

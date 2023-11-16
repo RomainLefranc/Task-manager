@@ -1,5 +1,5 @@
 "use client";
-import { Task } from "@prisma/client";
+import { Collection, Task } from "@prisma/client";
 import React from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from "./ui/dialog";
 import { DialogTitle } from "@radix-ui/react-dialog";
@@ -26,13 +26,15 @@ import { updateTask } from "@/actions/task";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import fr from "date-fns/locale/fr";
+import { CollectionColor, CollectionColors } from "@/lib/constants";
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
   task: Task;
+  collection: Collection;
 }
 
-function UpdateTaskDialog({ open, setOpen, task }: Props) {
+function UpdateTaskDialog({ open, setOpen, collection, task }: Props) {
   const form = useForm<taskSchemaType>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
@@ -145,7 +147,10 @@ function UpdateTaskDialog({ open, setOpen, task }: Props) {
         <DialogFooter>
           <Button
             disabled={form.formState.isSubmitting}
-            variant={"outline"}
+            className={cn(
+              "w-full dark:text-white text-white",
+              CollectionColors[collection.color as CollectionColor]
+            )}
             onClick={form.handleSubmit(onSubmit)}
           >
             Confirmer
